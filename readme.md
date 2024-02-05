@@ -14,4 +14,4 @@ Takhle se prochází postupně vybrané možnosti, dokud
 3. nebo vybraná možnost přesahuje kapacitu pole, což znamená, že je potřeba jí dodělat.
 
 ## Základní workflow schéma fungování
-![schéma] ()
+![schéma](diagram.jpg)

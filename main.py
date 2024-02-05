@@ -13,7 +13,7 @@ class Dialogue:
         if (self.options == []):
             return
 
-        print("\n")
+        print("")
         for i, (key, value) in enumerate(self.options.items()):
                     print(f"{i + 1}. {key}")
 
@@ -25,8 +25,7 @@ class Event:
         self.amount = amount
 
     def display(self):
-        print("\n")
-        print(self.text)
+        print(f"*{self.text}*")
 
 
 class Player:
@@ -41,8 +40,15 @@ class Player:
         return self.health > 0
 
     def display_stats(self):
-        print(f"{self.name}:\t{self.health} HP")
-        print ("\n");
+        for i in range(50):
+            print("-", end="")
+
+        print("\nJonáš Bořivoj Harvát")
+        print(f"Bodíky zdraví:\t{self.health} HP")
+
+        for i in range(50):
+            print("-", end="")
+        print("\n")
 
 
 class Game:
@@ -53,51 +59,67 @@ class Game:
             Dialogue("Blbý píčo.", []),
             Dialogue("Skvěle! Budeš muset zachránit princeznu, kterou unesl drak.", {"Jdu na to!": 3, "Nechci": 1}),
             Dialogue("Vydal ses na cestu, ale kousl tě do koulí had.", {":(": 4, "Auuu": 4}, [Event("Ztrácíš 10 HP.", "damage", 10)]),
-            Dialogue("To nevadí. Cesta pravého hrdiny zahrnuje i překážky ve formě nepatřičných nehod, náhod, různorodých nestvůr, nebezpečenství, zrady, lásky slz a potu.\nJsi připraven? Máš to? Cítíš se jako někdo, kdo je opravdu hoden takové výzvy, jako je záchrana líbezné princezny ze spárů zrůdné bestie?", {"Ano": 5, "*krátká odmlka* Ano": 5}),
-            Dialogue("Fajn", []),
+            Dialogue("To nevadí. Cesta pravého hrdiny zahrnuje i překážky ve formě nepatřičných nehod, náhod, různorodých nestvůr, nebezpečenství, zrady, lásky, slz a potu.\nJsi připraven? Máš to? Cítíš se jako někdo, kdo je opravdu hoden takové výzvy, jako je záchrana líbezné princezny ze spárů zrůdné bestie?", {"Ano": 5, "*krátká odmlka* Ano": 5}),
+            Dialogue("Fajn", [], [Event("Ztrácíš 50 HP.", "damage", 50), Event("Ztrácíš 40 HP.", "damage", 40)])
         ]
         self.current_dialogue = 0
 
     def play(self):
+        # dialogue index is out of range of array
         if (self.current_dialogue > len(self.dialogue) - 1):
-            print ("Je potřeba doprogramovat zbytek hry.")
+            print("Je potřeba doprogramovat zbytek hry.")
             return
 
-        self.player.display_stats()
 
+        # set current dialogue from array based on index
         dialogue = self.dialogue[self.current_dialogue]
-        dialogue.display_text()
 
+        # realize events
         for event in dialogue.events:
-            event.display()
             if event.type == "damage":
                 self.player.lose_health(event.amount)
-                if not self.player.is_alive():
-                    print("Zemřel jsi.")
-                    return
+        
+        self.player.display_stats()
 
-        dialogue.display_options()
+        # display dialogue text
+        dialogue.display_text()
 
-        if dialogue.options == []:
-            print("Konec hry.")
+        # display event texts
+        for event in dialogue.events:
+            event.display()
+
+        # if player is dead, end the game
+        if not self.player.is_alive():
+            print("*Zemřel jsi. Zkus to znovu.*")
             return
 
+        # if there are no options, end the game
+        if dialogue.options == []:
+            print("*Konec hry.*")
+            return
+
+        # display options for progressing dialogue
+        dialogue.display_options()
+
+        # next dialogue selection loop: runs until valid choice is made
         while True:
-            choice = input("\nVyber číslo možnosti > ")
+            choice = input("\nVyber číslo možnosti >")
+
+            # check is input is valid: is a number and is in range of options
             if not choice.isdigit() or int(choice) < 1 or int(choice) > len(dialogue.options):
-                print("Neplatná volba.")
+                print(">Neplatná volba.")
+                # jump back to the start of the loop
                 continue
             break
-            
-        self.current_dialogue = dialogue.options[list(dialogue.options.keys())[int(choice) - 1]]
+        
+        # set next dialogue based on player choice
+        next_dialogue_index = list(dialogue.options.keys())[int(choice) - 1]
+        self.current_dialogue = dialogue.options[next_dialogue_index]
 
-        # U windows nahradit clear za cls
+        # if using windows terminal, use 'cls' instead of 'clear'
         os.system('clear')
         self.play()
-
 
 game = Game()
 os.system('clear')
 game.play()
-
-
